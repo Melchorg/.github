@@ -1,0 +1,41 @@
+name: setup typst
+description: install typst compiler
+inputs:
+  version:
+    description: 'typst version (latest or specific version)'
+    required: false
+    default: 'latest'
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        if [ "${{ inputs.version }}" = "latest" ]; then
+          VERSION=$(curl -s https://api.github.com/repos/typst/typst/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+        else
+          VERSION="v${{ inputs.version }}"
+        fi
+        
+        ARCH=$(uname -m)
+        OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+        
+        case "$OS-$ARCH" in
+          linux-x86_64)
+            TARGET="x86_64-unknown-linux-musl"
+            ;;
+          darwin-arm64)
+            TARGET="aarch64-apple-darwin"
+            ;;
+          darwin-x86_64)
+            TARGET="x86_64-apple-darwin"
+            ;;
+          *)
+            echo "unsupported platform: $OS-$ARCH"
+            exit 1
+            ;;
+        esac
+        
+        URL="https://github.com/typst/typst/releases/download/${VERSION}/typst-${TARGET}.tar.xz"
+        curl -sL "$URL" | tar -xJ -C /usr/local/bin --strip-components=1 "typst-${TARGET}/typst"
+        
+        typst --version

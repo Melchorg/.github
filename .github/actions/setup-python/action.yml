@@ -1,0 +1,23 @@
+name: setup python
+description: install and configure python
+inputs:
+  version:
+    description: 'python version'
+    required: false
+    default: '3.12'
+  cache:
+    description: 'enable pip cache'
+    required: false
+    default: 'true'
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.version }}
+        cache: ${{ inputs.cache == 'true' && 'pip' || '' }}
+    
+    - shell: bash
+      run: |
+        python --version
+        pip --version
