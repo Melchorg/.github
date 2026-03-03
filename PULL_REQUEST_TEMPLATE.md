@@ -12,6 +12,6 @@
 
 ## checklist
 
+- [ ] hooks applied
 - [ ] tests pass
 - [ ] docs updated
-- [ ] follows style guide
