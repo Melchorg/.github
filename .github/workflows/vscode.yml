@@ -37,3 +37,4 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload ${{ github.ref_name }} "${{ github.event.repository.name }}.vsix"
+        
