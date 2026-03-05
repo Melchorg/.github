@@ -1,0 +1,52 @@
+name: "Python Setup, Test and Build with uv"
+description: "Installs uv, sets up Python, installs dependencies, runs pytest, and builds wheel"
+
+inputs:
+  deps:
+    description: "Whether to install deps"
+    default: "true"
+  test:
+    description: "Whether to run tests"
+    default: "true"
+  build:
+    description: "Whether to build wheel"
+    default: "true"
+  github-token:
+    description: "GitHub token for private repos"
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install uv
+      shell: bash
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version-file: pyproject.toml
+        cache: "pip"
+
+    - name: Configure Git for private repos
+      if: inputs.github-token != ''
+      shell: bash
+      run: |
+        git config --global url."https://x-access-token:${{ inputs.github-token }}@github.com/".insteadOf "https://github.com/"
+
+    - name: Install deps
+      if: inputs.deps == 'true'
+      shell: bash
+      run: uv sync --all-extras --dev
+
+    - name: Run tests
+      if: inputs.test == 'true'
+      shell: bash
+      run: uv run pytest
+
+    - name: Build wheel
+      if: inputs.build == 'true'
+      shell: bash
+      run: uv build --wheel
